@@ -107,15 +107,24 @@ pipeline {
             }
         }
         
+        stage('Build TypeScript') {
+            steps {
+                script {
+                    echo 'Compiling TypeScript to JavaScript...'
+                    sh 'npm run build || npx tsc'
+                }
+            }
+        }
+        
         stage('Execute Deletion Script') {
             steps {
                 script {
                     echo 'Running GDPR deletion script...'
                     
-                    // Run the TypeScript deletion script
+                    // Run the COMPILED JavaScript (not TypeScript)
                     def exitCode = sh(
                         script: """
-                            ./node_modules/.bin/ts-node scripts/delete-users.ts \
+                            node dist/scripts/delete-users.js \
                                 --publicIds="${params.PUBLIC_IDS}" \
                                 --requestId="${params.REQUEST_ID}" \
                                 --requestedBy="${params.REQUESTED_BY}" \

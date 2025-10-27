@@ -5,9 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "delete-users": "ts-node scripts/delete-users.ts",
-    "build": "tsc scripts/delete-users.ts",
-    "test": "echo \"Run via Jenkins pipeline\" && exit 0",
-    "worker": "ts-node src/workers/deletion.worker.ts"
+    "build": "tsc",
+    "test": "echo \"Run via Jenkins pipeline\" && exit 0"
   },
   "keywords": [
     "gdpr",
