@@ -51,6 +51,7 @@ pipeline {
         LOG_DIR = './logs'
         MAX_RETRIES = '3'
         NODE_ENV = 'production'
+        PATH = "/Users/jaykumar/bin:${env.PATH}"
     }
     
     options {
