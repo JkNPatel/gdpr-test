@@ -111,7 +111,7 @@ pipeline {
             steps {
                 script {
                     echo 'Compiling TypeScript to JavaScript...'
-                    sh 'npm run build || npx tsc'
+                    sh './node_modules/.bin/tsc'
                 }
             }
         }
