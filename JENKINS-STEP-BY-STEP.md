@@ -205,7 +205,97 @@ DRY_RUN: ✅ (check this box for safety)
 REASON: Testing Jenkins pipeline
 ```
 
-4. Click **"Build"**
+4. Click **"Build"**[Pipeline] {
+[Pipeline] echo
+21:36:27  Running GDPR deletion script...
+[Pipeline] sh
+21:36:28  + npx ts-node scripts/delete-users.ts --publicIds=test-user-1 --requestId=a1b2c3d4-5678-90ab-cdef-123456789012 --requestedBy=manual-test --dryRun=true
+21:36:28  npm warn exec The following package was not found and will be installed: ts-node@10.9.2
+21:36:32  /var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:859
+21:36:32      return new TSError(diagnosticText, diagnosticCodes, diagnostics);
+21:36:32             ^
+21:36:32  TSError: ⨯ Unable to compile TypeScript:
+21:36:32  scripts/delete-users.ts(7,22): error TS7016: Could not find a declaration file for module 'pg'. '/var/jenkins_home/workspace/gdpr-user-deletion/node_modules/pg/lib/index.js' implicitly has an 'any' type.
+21:36:32    Try `npm i --save-dev @types/pg` if it exists or add a new declaration (.d.ts) file containing `declare module 'pg';`
+21:36:32  
+21:36:32      at createTSError (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:859:12)
+21:36:32      at reportTSError (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:863:19)
+21:36:32      at getOutput (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1077:36)
+21:36:32      at Object.compile (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1433:41)
+21:36:32      at Module.m._compile (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1617:30)
+21:36:32      at node:internal/modules/cjs/loader:1839:10
+21:36:32      at Object.require.extensions.<computed> [as .ts] (/var/jenkins_home/.npm/_npx/1bf7c3c15bf47d04/node_modules/ts-node/src/index.ts:1621:12)
+21:36:32      at Module.load (node:internal/modules/cjs/loader:1441:32)
+21:36:32      at Function._load (node:internal/modules/cjs/loader:1263:12)
+21:36:32      at TracingChannel.traceSync (node:diagnostics_channel:328:14) {
+21:36:32    diagnosticCodes: [ 7016 ]
+21:36:32  }
+[Pipeline] error
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Archive Logs)
+Stage "Archive Logs" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+21:36:32  Job completed at: Mon Oct 27 03:36:32 UTC 2025
+[Pipeline] echo
+21:36:32  Duration: 14 sec and counting
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+21:36:32  ❌ =========================================
+[Pipeline] echo
+21:36:32  ❌ GDPR DELETION JOB FAILED
+[Pipeline] echo
+21:36:32  ❌ =========================================
+[Pipeline] echo
+21:36:32  Request ID: a1b2c3d4-5678-90ab-cdef-123456789012
+[Pipeline] echo
+21:36:32  Check console output for errors
+[Pipeline] echo
+21:36:32  ❌ =========================================
+[Pipeline] emailext
+21:36:32  Warning: A secret was passed to "emailext" using Groovy String interpolation, which is insecure.
+21:36:32  		 Affected argument(s) used the following variable(s): [PRODUCT_B_DB_HOST]
+21:36:32  		 See https://jenkins.io/redirect/groovy-string-interpolation for details.
+21:36:32  Sending email to: ${NOTIFICATION_EMAIL}
+21:36:32  Connection error sending email, retrying once more in 10 seconds...
+21:36:42  Connection error sending email, retrying once more in 10 seconds...
+21:36:52  Failed after second try sending email
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: Deletion script failed with exit code: 1
+Finished: FAILURE
 
 ### Step 2: Watch the Build
 
