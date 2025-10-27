@@ -105,7 +105,8 @@ pipeline {
                     // Use npm ci for deterministic installs (like pnpm --frozen-lockfile)
                     sh 'npm ci'
                     // Compile TypeScript to JavaScript
-                    sh 'npx tsc'
+                    // Use --package=typescript to avoid the fake 'tsc' package
+                    sh 'npx --package=typescript tsc'
                 }
             }
         }
