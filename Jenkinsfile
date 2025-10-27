@@ -2,11 +2,10 @@
 // No server/hosting required - runs on-demand only
 
 pipeline {
-    agent any
-    
-    tools {
-        // This makes the configured NodeJS installation available in the PATH
-        nodejs 'NodeJS-22'
+    agent {
+        dockerfile {
+            filename 'Dockerfile.Jenkinsfile'
+        }
     }
     
     parameters {
