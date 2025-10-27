@@ -2,11 +2,7 @@
 // No server/hosting required - runs on-demand only
 
 pipeline {
-    agent {
-        dockerfile {
-            filename 'Dockerfile.Jenkinsfile'
-        }
-    }
+    agent any
     
     parameters {
         string(
