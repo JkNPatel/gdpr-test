@@ -99,6 +99,8 @@ pipeline {
                     echo 'Installing dependencies and building...'
                     // Use npm ci for deterministic installs (like pnpm --frozen-lockfile)
                     sh 'npm ci'
+                    // Install type definitions required by TypeScript
+                    sh 'npm i --save-dev @types/node @types/pg'
                     // Compile TypeScript to JavaScript
                     // Use --package=typescript to avoid the fake 'tsc' package
                     sh 'npx --package=typescript tsc'
