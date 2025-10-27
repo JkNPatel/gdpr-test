@@ -115,7 +115,7 @@ pipeline {
                     // Run the TypeScript deletion script
                     def exitCode = sh(
                         script: """
-                            npx ts-node scripts/delete-users.ts \
+                            ./node_modules/.bin/ts-node scripts/delete-users.ts \
                                 --publicIds="${params.PUBLIC_IDS}" \
                                 --requestId="${params.REQUEST_ID}" \
                                 --requestedBy="${params.REQUESTED_BY}" \
