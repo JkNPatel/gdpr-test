@@ -39,7 +39,7 @@ pipeline {
         PRODUCT_B_DB_NAME = credentials('product-b-db-name')
         PRODUCT_B_DB_USER = credentials('product-b-db-user')
         PRODUCT_B_DB_PASSWORD = credentials('product-b-db-password')
-        PRODUCT_B_DB_SSL = 'true'
+        PRODUCT_B_DB_SSL = 'false'
         
         AMPLITUDE_API_KEY = credentials('amplitude-api-key')
         AMPLITUDE_SECRET_KEY = credentials('amplitude-secret-key')
