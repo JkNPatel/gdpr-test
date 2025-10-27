@@ -8,6 +8,10 @@ pipeline {
         }
     }
     
+    tools {
+        docker 'DefaultDocker'
+    }
+    
     parameters {
         string(
             name: 'PUBLIC_IDS',
