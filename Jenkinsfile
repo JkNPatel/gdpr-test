@@ -9,7 +9,7 @@ pipeline {
     }
     
     tools {
-        docker 'DefaultDocker'
+        dockerTool 'DefaultDocker'
     }
     
     parameters {

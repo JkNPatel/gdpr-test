@@ -200,7 +200,7 @@ Click **"Add Credentials"** and fill in:
 ```
 PUBLIC_IDS: test-user-123
 REQUESTED_BY: manual-test
-REQUEST_ID: (click "Generate UUID" or use: a1b2c3d4-5678-90ab-cdef-123456789012)
+REQUEST_ID: click "Generate UUID" or use: a1b2c3d4-5678-90ab-cdef-123456789012
 DRY_RUN: ✅ (check this box for safety)
 REASON: Testing Jenkins pipeline
 ```
