@@ -98,20 +98,14 @@ pipeline {
             }
         }
         
-        stage('Install Dependencies') {
+        stage('Build') {
             steps {
                 script {
-                    echo 'Installing Node.js dependencies...'
-                    sh 'npm install'
-                }
-            }
-        }
-        
-        stage('Build TypeScript') {
-            steps {
-                script {
-                    echo 'Compiling TypeScript to JavaScript...'
-                    sh './node_modules/.bin/tsc'
+                    echo 'Installing dependencies and building...'
+                    // Use npm ci for deterministic installs (like pnpm --frozen-lockfile)
+                    sh 'npm ci'
+                    // Compile TypeScript to JavaScript
+                    sh 'npx tsc'
                 }
             }
         }
