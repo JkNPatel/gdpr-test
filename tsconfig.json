@@ -11,6 +11,9 @@
     "lib": ["es2021"]
   },
   "include": [
-    "scripts/**/*"
+    "src/**/*"
+  ],
+  "exclude": [
+    "dist"
   ]
 }

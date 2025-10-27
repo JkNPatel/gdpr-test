@@ -1,14 +1,13 @@
-// GDPR User Deletion - Jenkins Pipeline
-// No server/hosting required - runs on-demand only
+// GDPR Assessment User Deletion - Jenkins Pipeline
 
 pipeline {
     agent any
     
     parameters {
-        string(
-            name: 'PUBLIC_IDS',
-            description: 'Comma-separated list of user public IDs to delete',
-            defaultValue: ''
+        text(
+            name: 'PUBLIC_IDS_JSON',
+            description: 'JSON array of user public IDs to delete, e.g., ["public_id_1", "public_id_2"]',
+            defaultValue: '[]'
         )
         string(
             name: 'REQUESTED_BY',
@@ -17,7 +16,7 @@ pipeline {
         )
         string(
             name: 'REQUEST_ID',
-            description: 'UUID for this deletion request',
+            description: 'UUID for this deletion request (auto-generated if empty)',
             defaultValue: ''
         )
         booleanParam(
@@ -26,9 +25,19 @@ pipeline {
             defaultValue: false
         )
         string(
-            name: 'REASON',
-            description: 'Optional reason for deletion',
+            name: 'DB_CHUNK_SIZE',
+            description: 'Users per DB transaction (leave empty for no chunking)',
             defaultValue: ''
+        )
+        string(
+            name: 'AMP_BATCH_SIZE',
+            description: 'Amplitude batch size',
+            defaultValue: '300'
+        )
+        string(
+            name: 'AMP_CONCURRENCY',
+            description: 'Concurrent Amplitude batches',
+            defaultValue: '4'
         )
     }
     
@@ -60,35 +69,41 @@ pipeline {
     }
     
     stages {
-        stage('Validate Parameters') {
+        stage('Validate Input') {
             steps {
                 script {
                     echo '========================================='
                     echo 'GDPR User Deletion Job'
                     echo '========================================='
-                    echo "Request ID: ${params.REQUEST_ID}"
                     echo "Requested By: ${params.REQUESTED_BY}"
-                    echo "Public IDs: ${params.PUBLIC_IDS}"
+                    echo "Public IDs: ${params.PUBLIC_IDS_JSON}"
+                    echo "Request ID: ${params.REQUEST_ID ?: 'auto-generated'}"
                     echo "Dry Run: ${params.DRY_RUN}"
                     echo '========================================='
                     
                     // Validate required parameters
-                    if (!params.REQUEST_ID) {
-                        error('REQUEST_ID parameter is required')
-                    }
-                    if (!params.PUBLIC_IDS) {
-                        error('PUBLIC_IDS parameter is required')
-                    }
                     if (!params.REQUESTED_BY) {
                         error('REQUESTED_BY parameter is required')
                     }
                     
-                    // Validate UUID format
-                    if (!params.REQUEST_ID.matches(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-                        error('REQUEST_ID must be a valid UUID')
+                    def idsText = params.PUBLIC_IDS_JSON.trim()
+                    if (!idsText || idsText == '[]') {
+                        error('PUBLIC_IDS_JSON parameter is required and must be a non-empty array')
                     }
                     
-                    currentBuild.description = "${params.DRY_RUN ? '[DRY RUN] ' : ''}${params.REQUEST_ID}"
+                    // Write IDs to file for validation
+                    writeFile file: 'ids.json', text: idsText
+                    
+                    // Validate JSON format
+                    sh '''
+                        node -e "const ids = JSON.parse(require('fs').readFileSync('ids.json', 'utf8')); \
+                                if (!Array.isArray(ids) || ids.length === 0) \
+                                throw new Error('ids.json must be a non-empty array');"
+                    '''
+                    
+                    // Set build description
+                    def reqId = params.REQUEST_ID ?: 'auto'
+                    currentBuild.description = "${params.DRY_RUN ? '[DRY RUN] ' : ''}${reqId}"
                 }
             }
         }
@@ -106,44 +121,50 @@ pipeline {
             }
         }
         
-        stage('Execute Deletion Script') {
+        stage('Execute GDPR Deletion') {
             steps {
                 script {
-                    echo 'Running GDPR deletion script...'
+                    echo 'Running GDPR deletion job...'
                     
-                    // Run the COMPILED JavaScript (not TypeScript)
+                    // Run the production-grade CLI
                     def exitCode = sh(
                         script: """
-                            node dist/scripts/delete-users.js \
-                                --publicIds="${params.PUBLIC_IDS}" \
-                                --requestId="${params.REQUEST_ID}" \
-                                --requestedBy="${params.REQUESTED_BY}" \
-                                --dryRun=${params.DRY_RUN}
+                            IDS_JSON=ids.json \
+                            SQL_PATH="sql/gdpr-deletion.sql" \
+                            REQUESTED_BY="${params.REQUESTED_BY}" \
+                            REQUEST_ID="${params.REQUEST_ID}" \
+                            DRY_RUN="${params.DRY_RUN}" \
+                            DB_CHUNK_SIZE="${params.DB_CHUNK_SIZE}" \
+                            AMP_BATCH_SIZE="${params.AMP_BATCH_SIZE}" \
+                            AMP_CONCURRENCY="${params.AMP_CONCURRENCY}" \
+                            node dist/main.js
                         """,
                         returnStatus: true
                     )
                     
-                    if (exitCode != 0) {
-                        error("Deletion script failed with exit code: ${exitCode}")
+                    if (exitCode == 2) {
+                        unstable('Some Amplitude deletions failed - see report.json')
+                    } else if (exitCode != 0) {
+                        error("GDPR deletion job failed with exit code: ${exitCode}")
                     }
                     
-                    echo '✅ Deletion script completed successfully'
+                    echo '✅ GDPR deletion job completed'
                 }
             }
         }
         
-        stage('Archive Logs') {
+        stage('Archive Artifacts') {
             steps {
                 script {
-                    echo 'Archiving audit logs...'
+                    echo 'Archiving deletion reports and artifacts...'
                     
                     archiveArtifacts(
-                        artifacts: 'logs/**/*.log',
+                        artifacts: 'report.json,summary.txt,ids.json,sql/gdpr-deletion.sql,logs/**/*.log',
                         allowEmptyArchive: true,
                         fingerprint: true
                     )
                     
-                    echo 'Logs archived successfully'
+                    echo 'Artifacts archived successfully'
                 }
             }
         }
@@ -173,6 +194,7 @@ pipeline {
                 echo '❌ GDPR DELETION JOB FAILED'
                 echo '❌ ========================================='
                 echo "Request ID: ${params.REQUEST_ID}"
+                echo "Public IDs processed: ${params.PUBLIC_IDS}"
                 echo "Check console output for errors"
                 echo '❌ ========================================='
                 
