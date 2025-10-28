@@ -75,8 +75,23 @@ GROUP BY u.public_id, u.email;
 ## Step 5: Configure Environment
 
 ```bash
-# Create .env file
-cp .env.example .env
+# Create local environment file
+cp .env.example .env.local
+
+# Edit .env.local with your actual credentials
+# Required variables:
+# - DB_URL: Full PostgreSQL connection string
+# - AMPLITUDE_KEY: Your Amplitude API key
+```
+
+**Example `.env.local`:**
+```bash
+DB_URL=postgres://gdpr_test_user:test_password@localhost:5432/product_b_test?sslmode=disable
+AMPLITUDE_KEY=your-amplitude-api-key
+REQUESTED_BY=local-dev
+DRY_RUN=true
+IDS_JSON=ids.json
+SQL_PATH=sql/gdpr-deletion.sql
 ```
 
 Edit `.env` with your local settings:
@@ -108,21 +123,15 @@ MAX_RETRIES=3
 npm install
 ```
 
-## Step 7: Test the Script
-
-### Test 1: Dry Run (No actual deletion)
+## Step 7: Run a Test Deletion (Dry Run)
 
 ```bash
-npx ts-node scripts/delete-users.ts \
-  --publicIds=test-user-123 \
-  --requestId=$(uuidgen) \
-  --requestedBy=local-test \
-  --dryRun=true
-```
+# 1. Build the TypeScript code
+npm install
+npm run build
 
-**Expected output:**
-```
-[DRY RUN] Would delete 4 rows for test-user-123
+# 2. Create a test input file with user IDs
+echo '["36797400", "36797401"]' > ids.json
 
 ========================================
 GDPR DELETION SUMMARY

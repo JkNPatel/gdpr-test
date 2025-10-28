@@ -198,12 +198,19 @@ Click **"Add Credentials"** and fill in:
 3. Fill in the parameters:
 
 ```
-PUBLIC_IDS: test-user-123
-REQUESTED_BY: manual-test
-REQUEST_ID: click "Generate UUID" or use: a1b2c3d4-5678-90ab-cdef-123456789012
+PUBLIC_IDS_JSON: ["36797400", "36797401"]
+REQUESTED_BY: your-name
+REQUEST_ID: (leave empty for auto-generation or paste a UUID)
 DRY_RUN: ✅ (check this box for safety)
-REASON: Testing Jenkins pipeline
+DB_CHUNK_SIZE: (leave empty for default)
+AMP_BATCH_SIZE: 300 (default)
+AMP_CONCURRENCY: 4 (default)
 ```
+
+**Important:** `PUBLIC_IDS_JSON` must be a valid JSON array of strings:
+- ✅ Correct: `["user1", "user2"]`
+- ❌ Wrong: `user1, user2`
+- ❌ Wrong: `[user1, user2]` (missing quotes)
 
 4. Click **"Build"**[Pipeline] {
 [Pipeline] echo

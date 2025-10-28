@@ -39,13 +39,22 @@ Product A → Jenkins API (trigger job) → Script runs → Database + Amplitude
 
 **General Settings:**
 - ✅ Check "This project is parameterized"
-- Add these **String Parameters**:
-  - `PUBLIC_IDS` (required)
-  - `REQUESTED_BY` (required)
-  - `REQUEST_ID` (required)
-  - `REASON` (optional)
-- Add **Boolean Parameter**:
-  - `DRY_RUN` (default: false)
+- Add these parameters:
+
+**Text Parameter:**
+  - Name: `PUBLIC_IDS_JSON`
+  - Description: `JSON array of user external IDs, e.g., ["36797400", "36797401"]`
+  - Default: `[]`
+
+**String Parameters:**
+  - `REQUESTED_BY` (required) - Who requested the deletion
+  - `REQUEST_ID` (optional) - UUID for tracking (auto-generated if empty)
+  - `DB_CHUNK_SIZE` (optional) - Users per transaction (empty = no chunking)
+  - `AMP_BATCH_SIZE` (optional, default: 300) - Amplitude batch size
+  - `AMP_CONCURRENCY` (optional, default: 4) - Concurrent Amplitude requests
+
+**Boolean Parameter:**
+  - `DRY_RUN` (default: true) - Set to false for actual deletion
 
 **Pipeline Settings:**
 - Definition: **Pipeline script from SCM**
@@ -55,33 +64,27 @@ Product A → Jenkins API (trigger job) → Script runs → Database + Amplitude
 
 ### 3. Store Credentials in Jenkins
 
-Go to Jenkins → Credentials → Add Credentials:
+Go to Jenkins → Manage Jenkins → Credentials → Add Credentials:
+
+**Required Credentials:**
 
 ```
-ID: product-b-db-host
-Type: Secret text
-Secret: your-database-host
-
-ID: product-b-db-name
-Type: Secret text
-Secret: product_b
-
-ID: product-b-db-user
-Type: Secret text
-Secret: gdpr_deletion_user
-
-ID: product-b-db-password
-Type: Secret text
-Secret: your-secure-password
+ID: db-url
+Kind: Secret text
+Secret: postgres://user:password@host:5432/database?sslmode=require
+Description: Full PostgreSQL connection string
 
 ID: amplitude-api-key
-Type: Secret text
-Secret: your-amplitude-key
-
-ID: amplitude-secret-key
-Type: Secret text
-Secret: your-amplitude-secret
+Kind: Secret text
+Secret: your-amplitude-api-key
+Description: Amplitude API Key for user deletion
 ```
+
+**Important Notes:**
+- Use full connection string format for `db-url`
+- For Jenkins running in Docker, use `host.docker.internal` instead of `localhost`
+- Example: `postgres://gdpr_deletion_user:pass@host.docker.internal:5432/product_b?sslmode=disable`
+- Never commit these credentials to Git
 
 ### 4. Deploy Code to Jenkins
 
